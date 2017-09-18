@@ -1,6 +1,6 @@
 spring:
     datasource:
-        url: jdbc:mysql://127.0.0.1:3306/student
+        url: jdbc:mysql://127.0.0.1:3306/film
         username: root
         password: admin123
         driver-class-name: com.mysql.jdbc.Driver
@@ -8,3 +8,9 @@ spring:
         hibernate:
             ddl-auto: update
             show-sql: true
+
+filmDir: D:\\films
+logging:
+  level:
+      edu: debug
+remotePort: 8080
