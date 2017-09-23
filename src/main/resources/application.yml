@@ -10,6 +10,7 @@ spring:
             show-sql: true
 
 filmDir: D:\\films
+onlyId: 2342
 logging:
   level:
       edu: debug
