@@ -1,4 +1,5 @@
 package edu.shu.yan.transclient;
+import java.io.File;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import edu.shu.yan.util.SystemInfo;
 
 @Component
 public class ScheduledTasks {
@@ -124,6 +126,7 @@ public class ScheduledTasks {
      */
     @Scheduled(fixedDelay = 10000)
     public void rpcMessage() {
+        sendOneMessage("34fr",23);
         // 注册管理器
         Registry registry = null;
         try {
@@ -151,28 +154,73 @@ public class ScheduledTasks {
                 ServerMessage serverMessage = JSON.parseObject(proMessage, ServerMessage.class);
                 //插入需要下载的信息
                 for (int i = 0; i < serverMessage.getFirstMessage().length; i++) {
-                    Film film = new Film();
-                    film.setCreateTime(new Date());
-                    film.setState(0);
-                    film.setFilmId(serverMessage.getFirstMessage()[i].getFirstId());
-                    film.setRemoteIp(serverMessage.getFirstMessage()[i].getFirstIP());
-                    film.setPassWord(serverMessage.getFirstMessage()[i].getFirstPass());
-                    film.setUserName(serverMessage.getFirstMessage()[i].getFirstUsername());
-                    filmDao.save(film);
+                    //需要查询任务的状态，是否已经存在或是0
+                    Film filmFileFind = new Film();
+                    filmFileFind.setFilmId(serverMessage.getFirstMessage()[i].getFirstId());
+                    ExampleMatcher matcher = ExampleMatcher.matching();
+                    Example<Film> ex = Example.of(filmFileFind, matcher);
+                    List<Film> films = filmDao.findAll(ex);
+
+                    if (films.size()==0){
+                        //save
+                        Film film = new Film();
+                        film.setCreateTime(new Date());
+                        film.setState(0);
+                        film.setFilmId(serverMessage.getFirstMessage()[i].getFirstId());
+                        film.setRemoteIp(serverMessage.getFirstMessage()[i].getFirstIP());
+                        film.setPassWord(serverMessage.getFirstMessage()[i].getFirstPass());
+                        film.setUserName(serverMessage.getFirstMessage()[i].getFirstUsername());
+                        filmDao.save(film);
+                    }else if (films.get(0).getState() != 1){
+                        Film film = films.get(0);
+                        film.setState(0);
+                        film.setRemoteIp(serverMessage.getFirstMessage()[i].getFirstIP());
+                        film.setPassWord(serverMessage.getFirstMessage()[i].getFirstPass());
+                        film.setUserName(serverMessage.getFirstMessage()[i].getFirstUsername());
+                        filmDao.save(film);
+                    }
+
+
+
+
                 }
                 //获取需要的分站信息
                 String setStateInfo = "";
                 String stateInfo = serverMessage.getStateInfo();
                 String[] strsInfo = stateInfo.split(",");
-                for (int i = 0; i < strsInfo.length-1; i++) {
-                    setStateInfo += String.valueOf(23)+",";
-                    System.out.println(strsInfo[i]);
+                for (int i = 0; i < strsInfo.length; i++) {
+                    switch (Integer.parseInt(strsInfo[i])){
+                        case 1:
+                            String memInfo = SystemInfo.getMemoryInfo();
+                            System.out.println("memory info(used/total): "+memInfo);
+                            setStateInfo +=memInfo;
+                            setStateInfo += ",";
+                            break;
+                        case 2:
+                            double cpuInfo = SystemInfo.getCpuInfo();
+                            System.out.println("cpu info(used rate): "+String.valueOf(cpuInfo));
+                            setStateInfo +=String.valueOf(cpuInfo);
+                            setStateInfo += ",";
+                            break;
+                        case 3:
+                            String diskInfo = SystemInfo.getDistInfo();
+                            System.out.println("disk info(free/total): "+diskInfo);
+                            setStateInfo +=diskInfo;
+                            setStateInfo += ",";
+                            break;
+                        case 4:
+                            SystemInfo.getFile(new File("/home/xc/文档"));
+                            System.out.println("文档总数: "+String.valueOf(SystemInfo.count));
+                            setStateInfo +=String.valueOf(SystemInfo.count);
+                            setStateInfo += ",";
+                            break;
+                    }
                 }
                 //获取需要的数据
                 String setDataInfo = "";
                 String dataInfo = serverMessage.getDataInfo();
                 String[] datasInfo = dataInfo.split(",");
-                for (int i = 0; i < datasInfo.length-1; i++) {
+                for (int i = 0; i < datasInfo.length; i++) {
                     System.out.println(datasInfo[i]);
                     //查进度
                     FilmFile filmFile = new FilmFile();
@@ -183,10 +231,13 @@ public class ScheduledTasks {
                     int sumCount = 0;
                     if (films.size() == 0)
                         setDataInfo += String.valueOf(0)+",";
-                    for (int j = 0; j < films.size(); j++) {
-                        sumCount += films.get(j).getProgress()/5;
-                        setDataInfo += String.valueOf(sumCount)+",";
+                    else{
+                        for (int j = 0; j < films.size(); j++) {
+                            sumCount += films.get(j).getProgress()/5;
+                            setDataInfo += String.valueOf(sumCount)+",";
+                        }
                     }
+
 
                 }
                 sendMessage.setNameInfo(onlyId+",");
@@ -244,7 +295,7 @@ public class ScheduledTasks {
         }
         try {
             // 根据命名获取服务
-            IService server = (IService) registry.lookup("onlyMessage");
+            IService server = (IService) registry.lookup("vince");
             System.out.println("onlyMessage客户端发送的内容：");
             String stringMessage = JSON.toJSONString(onlyId+","+filmId+","+String.valueOf(filmState));
 

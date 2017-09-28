@@ -45,6 +45,14 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.20</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.fusesource/sigar -->
+		<dependency>
+			<groupId>org.fusesource</groupId>
+			<artifactId>sigar</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+
+
 
 	</dependencies>
 
