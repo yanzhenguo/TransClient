@@ -10,6 +10,7 @@ spring:
             show-sql: true
 
 filmDir: D:\\films
+mainStation: 127.0.0.1 #主站的IP地址
 onlyId: 2342
 logging:
   level:

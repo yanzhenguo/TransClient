@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Class-Path: hibernate-commons-annotations-5.0.1.Final.jar spring-jdbc-
+ 4.3.10.RELEASE.jar antlr-2.7.7.jar javassist-3.21.0-GA.jar hibernate-
+ entitymanager-5.0.12.Final.jar spring-boot-1.5.6.RELEASE.jar spring-e
+ xpression-4.3.10.RELEASE.jar spring-data-jpa-1.11.6.RELEASE.jar sprin
+ g-core-4.3.10.RELEASE.jar hibernate-jpa-2.1-api-1.0.0.Final.jar sprin
+ g-orm-4.3.10.RELEASE.jar spring-tx-4.3.10.RELEASE.jar javax.transacti
+ on-api-1.2.jar log4j-over-slf4j-1.7.25.jar spring-data-commons-1.13.6
+ .RELEASE.jar jul-to-slf4j-1.7.25.jar spring-boot-starter-jdbc-1.5.6.R
+ ELEASE.jar log4j-1.2.15.jar tomcat-juli-8.5.16.jar spring-aspects-4.3
+ .10.RELEASE.jar spring-boot-starter-data-jpa-1.5.6.RELEASE.jar jandex
+ -2.0.0.Final.jar hibernate-core-5.0.12.Final.jar spring-boot-starter-
+ 1.5.6.RELEASE.jar spring-beans-4.3.10.RELEASE.jar dom4j-1.6.1.jar fas
+ tjson-1.2.20.jar sigar-1.6.4.jar jcl-over-slf4j-1.7.25.jar jboss-logg
+ ing-3.3.1.Final.jar logback-core-1.1.11.jar spring-boot-starter-loggi
+ ng-1.5.6.RELEASE.jar spring-aop-4.3.10.RELEASE.jar snakeyaml-1.17.jar
+  spring-context-4.3.10.RELEASE.jar logback-classic-1.1.11.jar slf4j-a
+ pi-1.7.25.jar spring-boot-starter-aop-1.5.6.RELEASE.jar mysql-connect
+ or-java-5.1.43.jar spring-boot-autoconfigure-1.5.6.RELEASE.jar tomcat
+ -jdbc-8.5.16.jar aspectjweaver-1.8.10.jar
+Main-Class: edu.shu.MainClass
+

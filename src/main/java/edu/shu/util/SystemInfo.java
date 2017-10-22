@@ -1,4 +1,4 @@
-package edu.shu.yan.util;
+package edu.shu.util;
 
 import org.hyperic.sigar.*;
 
@@ -7,11 +7,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
 public class SystemInfo {
-    public static int count=0;
     /**
      * 获取内存使用情况
      *
-     * @return
+     * @return 内存使用量
      */
     public static String getMemoryInfo() {
         Sigar sigar = new Sigar();
@@ -51,7 +50,7 @@ public class SystemInfo {
         long total = 0;
         long free = 0;
         Sigar sigar = new Sigar();
-        FileSystem fslist[] = null;
+        FileSystem fslist[];
         try {
             fslist = sigar.getFileSystemList();
         } catch (Exception e) {
@@ -61,7 +60,7 @@ public class SystemInfo {
 
         for (int i = 0; i < fslist.length; i++) {
             FileSystem fs = fslist[i];
-            FileSystemUsage usage = null;
+            FileSystemUsage usage;
             try {
                 usage = sigar.getFileSystemUsage(fs.getDirName());
             } catch (SigarException e) {
@@ -79,14 +78,16 @@ public class SystemInfo {
      * 获取文件夹下文件数目
      * @param f 要遍历的文件夹
      */
-    public static void getFile(File f) {
+    public static int getFile(File f) {
+        int count=0;
         if(f.isFile()) {
-            count++;
-            return;
+            return 1;
         }
         File[] listfile = f.listFiles();
+        if(listfile==null || listfile.length==0) return 0;
         for (int i = 0; i < listfile.length; i++) {
-            getFile(listfile[i]);
+            count+=getFile(listfile[i]);
         }
+        return count;
     }
 }

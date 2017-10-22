@@ -1,29 +1,22 @@
-package edu.shu.yan.trans;
+package edu.shu.trans;
 
 import com.alibaba.fastjson.JSON;
-import edu.shu.yan.dao.FilmFileDao;
-import edu.shu.yan.entity.Film;
-import edu.shu.yan.entity.FilmFile;
-import edu.shu.yan.entity.utilEntity.FileSpe;
-import edu.shu.yan.transclient.ScheduledTasks;
-import edu.shu.yan.util.FileUtil;
-import edu.shu.yan.util.SpringUtil;
+import edu.shu.dao.FilmFileDao;
+import edu.shu.entity.FilmFile;
+import edu.shu.entity.utilEntity.FileSpe;
+import edu.shu.transclient.ScheduledTasks;
+import edu.shu.util.FileUtil;
+import edu.shu.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.stereotype.Component;
 import sun.misc.BASE64Encoder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
@@ -99,6 +92,7 @@ public class HttpsTrans{
      */
     public void getFilmFile(String filmId){
         //首先检查是否已检索过了
+        log.debug("look up files from server");
         FilmFile f = new FilmFile();
         f.setFilmId(filmId);
         ExampleMatcher matcher = ExampleMatcher.matching();
@@ -116,6 +110,7 @@ public class HttpsTrans{
             String response = "", line = "";
             while ((line = in.readLine()) != null) response += line;
             List<FileSpe> fileSpes = JSON.parseArray(response, FileSpe.class);
+            log.debug("there are"+fileSpes.size()+"files of film"+filmId);
             for(FileSpe spe: fileSpes){
                 FilmFile filmFile = new FilmFile();
                 filmFile.setCreateTime(new Date());

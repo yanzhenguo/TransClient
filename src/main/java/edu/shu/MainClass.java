@@ -1,11 +1,10 @@
-package edu.shu.yan;
+package edu.shu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import sun.applet.Main;
 
 @SpringBootApplication
 @EnableScheduling

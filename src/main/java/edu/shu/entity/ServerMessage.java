@@ -1,22 +1,22 @@
-package edu.shu.yan.entity;
+package edu.shu.entity;
 
 /**
  * Created by xc on 2017/9/22.
  */
-public class Message {
-    private String nameInfo;
+public class ServerMessage {
+    private FirstMessage[] firstMessage;
     private String dataInfo;
     private String stateInfo;
 
-    public Message() {
+    public ServerMessage() {
     }
 
-    public String getNameInfo() {
-        return nameInfo;
+    public FirstMessage[] getFirstMessage() {
+        return firstMessage;
     }
 
-    public void setNameInfo(String nameInfo) {
-        this.nameInfo = nameInfo;
+    public void setFirstMessage(FirstMessage[] firstMessage) {
+        this.firstMessage = firstMessage;
     }
 
     public String getStateInfo() {

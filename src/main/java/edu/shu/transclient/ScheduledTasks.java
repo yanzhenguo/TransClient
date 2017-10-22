@@ -1,4 +1,4 @@
-package edu.shu.yan.transclient;
+package edu.shu.transclient;
 import java.io.File;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
@@ -10,14 +10,15 @@ import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
-import edu.shu.yan.dao.FilmDao;
-import edu.shu.yan.dao.FilmFileDao;
-import edu.shu.yan.entity.Film;
-import edu.shu.yan.entity.FilmFile;
-import edu.shu.yan.entity.Message;
-import edu.shu.yan.entity.ServerMessage;
-import edu.shu.yan.IService;
-import edu.shu.yan.trans.HttpsTrans;
+import edu.shu.IService;
+import edu.shu.dao.FilmDao;
+import edu.shu.entity.Film;
+import edu.shu.entity.Message;
+import edu.shu.entity.ServerMessage;
+import edu.shu.trans.HttpsTrans;
+import edu.shu.util.SystemInfo;
+import edu.shu.dao.FilmFileDao;
+import edu.shu.entity.FilmFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import edu.shu.yan.util.SystemInfo;
 
 @Component
 public class ScheduledTasks {
@@ -38,6 +38,8 @@ public class ScheduledTasks {
     private String filmDir;
     @Value("${onlyId}")
     private String onlyId;
+    @Value("${mainStation}")
+    private String mainStation;
     private static String proMessage="";
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
@@ -47,7 +49,7 @@ public class ScheduledTasks {
     /**
      * 定期检查是否有新任务，若有，则执行。
      */
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 10000)
     public void executeTask(){
         //查找是否有新任务
         Film film = new Film();
@@ -61,10 +63,14 @@ public class ScheduledTasks {
         HttpsTrans httpsTrans = new HttpsTrans(film.getRemoteIp(),film.getUserName(),film.getPassWord());
         String isLogin = httpsTrans.login();
         if(!isLogin.equals("success")){
-            for(int i=0;i<3;i++){
+            for(int i=0;i<10;i++){
                 isLogin = httpsTrans.login();
                 if(isLogin.equals("success")) break;
             }
+        }
+        if(isLogin.equals("wrong")){
+            log.warn(" cannot connect to server after several tries.");
+            return;
         }
         if(isLogin.equals("expire")){
             //登陆错误处理
@@ -93,7 +99,7 @@ public class ScheduledTasks {
     /**
      * 更新任务的状态
      */
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 10000)
     public void updateTask(){
         //查找是否有未完成任务
         Film film = new Film();
@@ -131,7 +137,7 @@ public class ScheduledTasks {
         Registry registry = null;
         try {
             // 获取服务注册管理器
-            registry = LocateRegistry.getRegistry("127.0.0.1",8088);
+            registry = LocateRegistry.getRegistry(mainStation,8088);
             // 列出所有注册的服务
             String[] list = registry.list();
             for(String s : list){
@@ -209,9 +215,9 @@ public class ScheduledTasks {
                             setStateInfo += ",";
                             break;
                         case 4:
-                            SystemInfo.getFile(new File("/home/xc/文档"));
-                            System.out.println("文档总数: "+String.valueOf(SystemInfo.count));
-                            setStateInfo +=String.valueOf(SystemInfo.count);
+                            int docCount = SystemInfo.getFile(new File("D:\\films"));
+                            System.out.println("文档总数: "+String.valueOf(docCount));
+                            setStateInfo +=String.valueOf(docCount);
                             setStateInfo += ",";
                             break;
                     }
@@ -233,9 +239,9 @@ public class ScheduledTasks {
                         setDataInfo += String.valueOf(0)+",";
                     else{
                         for (int j = 0; j < films.size(); j++) {
-                            sumCount += films.get(j).getProgress()/5;
-                            setDataInfo += String.valueOf(sumCount)+",";
+                            sumCount += films.get(j).getProgress()/films.size();
                         }
+                        setDataInfo += String.valueOf(sumCount)+",";
                     }
 
 
@@ -287,7 +293,7 @@ public class ScheduledTasks {
         Registry registry = null;
         try {
             // 获取服务注册管理器
-            registry = LocateRegistry.getRegistry("127.0.0.1",8088);
+            registry = LocateRegistry.getRegistry(mainStation,8088);
             // 列出所有注册的服务
         } catch (RemoteException e) {
             System.out.println(1);

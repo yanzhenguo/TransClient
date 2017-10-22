@@ -1,4 +1,4 @@
-package edu.shu.yan.entity;
+package edu.shu.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

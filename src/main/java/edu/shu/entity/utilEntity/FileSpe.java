@@ -1,4 +1,4 @@
-package edu.shu.yan.entity.utilEntity;
+package edu.shu.entity.utilEntity;
 
 public class FileSpe {
     private Integer id;

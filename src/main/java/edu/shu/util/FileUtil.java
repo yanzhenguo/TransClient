@@ -1,4 +1,4 @@
-package edu.shu.yan.util;
+package edu.shu.util;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,4 +1,4 @@
-package edu.shu.yan.entity;
+package edu.shu.entity;
 
 /**
  * Created by xc on 2017/9/22.
