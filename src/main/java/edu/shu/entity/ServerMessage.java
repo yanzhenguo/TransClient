@@ -1,7 +1,7 @@
 package edu.shu.entity;
 
 /**
- * Created by xc on 2017/9/22.
+ * 从主站返回的消息类
  */
 public class ServerMessage {
     private FirstMessage[] firstMessage;

@@ -4,7 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * Created by xc on 2017/9/14.
+ * 与主站对应的rpc服务
  */
 public interface IService extends Remote {
     String queryName(String no) throws RemoteException;

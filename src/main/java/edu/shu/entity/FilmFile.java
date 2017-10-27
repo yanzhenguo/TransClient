@@ -6,6 +6,9 @@ import javax.persistence.Id;
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Date;
 
+/**
+ * 数据表对应的实体类，包含文件的具体信息
+ */
 @Entity
 public class FilmFile {
 

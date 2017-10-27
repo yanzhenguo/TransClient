@@ -8,11 +8,14 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * 文件相关的工具
+ */
 public class FileUtil {
     /**
      * 根据文件计算出文件的MD5
      * @param file
-     * @return
+     * @return 文件的MD5
      */
     public static String getFileMD5(File file) {
         if (!file.isFile()) {

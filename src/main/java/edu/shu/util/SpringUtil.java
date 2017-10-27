@@ -6,6 +6,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * 供非spring管理的类获取spring管理的bean
+ */
 @Component
 public class SpringUtil implements ApplicationContextAware {
     @Value("${remotePort}")

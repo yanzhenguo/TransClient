@@ -6,6 +6,9 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
+/**
+ * 获取系统运行信息的工具类
+ */
 public class SystemInfo {
     /**
      * 获取内存使用情况

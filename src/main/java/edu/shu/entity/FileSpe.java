@@ -1,5 +1,8 @@
-package edu.shu.entity.utilEntity;
+package edu.shu.entity;
 
+/**
+ * 内容服务器返回的文件信息类
+ */
 public class FileSpe {
     private Integer id;
     private String uuid;

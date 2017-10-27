@@ -3,7 +3,7 @@ package edu.shu.trans;
 import com.alibaba.fastjson.JSON;
 import edu.shu.dao.FilmFileDao;
 import edu.shu.entity.FilmFile;
-import edu.shu.entity.utilEntity.FileSpe;
+import edu.shu.entity.FileSpe;
 import edu.shu.transclient.ScheduledTasks;
 import edu.shu.util.FileUtil;
 import edu.shu.util.SpringUtil;
@@ -20,6 +20,9 @@ import java.security.MessageDigest;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 负责与内容服务器进行文件传输
+ */
 public class HttpsTrans{
     private FilmFileDao filmFileDao= SpringUtil.getBean(FilmFileDao.class);
     private String remotePort = SpringUtil.getBean(SpringUtil.class).getRemotePort();
@@ -28,6 +31,7 @@ public class HttpsTrans{
     private String userName;
     private String passWord;
     private String sessionId;
+
     public HttpsTrans(String ip, String userName, String passWord){
         this.ip = ip;
         this.userName = userName;
@@ -36,7 +40,7 @@ public class HttpsTrans{
 
     /**
      * 请求登陆服务器
-     * @return
+     * @return 登陆结果
      */
     public String login(){
         try {
@@ -60,8 +64,8 @@ public class HttpsTrans{
 
     /**
      * 验证登陆
-     * @param key
-     * @return
+     * @param key 第一步登陆时服务器返回的随机字符串
+     * @return 验证结果
      */
     public String loginValidate(String key){
         try {
@@ -88,7 +92,7 @@ public class HttpsTrans{
 
     /**
      * 从内容服务器获取节目相关文件，保存到数据库
-     * @param filmId
+     * @param filmId 节目id
      */
     public void getFilmFile(String filmId){
         //首先检查是否已检索过了
@@ -133,10 +137,9 @@ public class HttpsTrans{
 
     /**
      * 从内容服务器下载一个文件
-     * @param localDir
-     * @param fileName
-     * @param filmId
-     * @throws IOException
+     * @param localDir 文件本地路径
+     * @param fileName 文件名
+     * @param filmId 节目id
      */
     public void download(String localDir,String fileName,String filmId){
         log.debug("begin to download,filmId: "+filmId+" fileName: "+fileName);
@@ -179,6 +182,14 @@ public class HttpsTrans{
             log.warn("error occur when download file.");
         }
     }
+
+    /**
+     * 文件上传，该函数暂未使用
+     * @param key 随机字符串
+     * @param path 本地路径
+     * @param fileName 文件名
+     * @param urlStr 请求url
+     */
     public void upload(String key, String path, String fileName, String urlStr){
 
         try {
@@ -212,10 +223,10 @@ public class HttpsTrans{
 
     /**
      * 验证文件是否已经下载完成
-     * @param file
-     * @param fileName
-     * @param filmId
-     * @return
+     * @param file 待验证的文件
+     * @param fileName 文件名
+     * @param filmId 节目id
+     * @return 验证结果
      */
     public boolean validateFile(File file,String fileName,String filmId){
         if(!file.exists()) return  false;
@@ -245,9 +256,9 @@ public class HttpsTrans{
 
     /**
      * 获取文件正确的大小
-     * @param fileName
-     * @param filmId
-     * @return
+     * @param fileName 文件名
+     * @param filmId 节目id
+     * @return 文件大小
      */
     public long getFileSize(String fileName,String filmId){
         FilmFile f = new FilmFile();
@@ -261,10 +272,10 @@ public class HttpsTrans{
 
     /**
      * 更新文件的下载进度
-     * @param sumRead
-     * @param realSize
-     * @param fileName
-     * @param filmId
+     * @param sumRead 已下载的大小
+     * @param realSize 文件大小
+     * @param fileName 文件名
+     * @param filmId 节目id
      */
     public void updateProcess(long sumRead, long realSize, String fileName,String filmId){
         FilmFile f = new FilmFile();

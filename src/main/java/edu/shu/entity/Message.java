@@ -1,7 +1,7 @@
 package edu.shu.entity;
 
 /**
- * Created by xc on 2017/9/22.
+ * 向主站发送的消息类
  */
 public class Message {
     private String nameInfo;

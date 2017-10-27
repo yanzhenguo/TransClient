@@ -5,6 +5,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.Date;
 
+/**
+ * 数据库表对应的实体类，包含节目相关信息
+ */
 @Entity
 public class Film {
     @Id

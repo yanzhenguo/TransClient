@@ -28,6 +28,9 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * 定期调度任务类
+ */
 @Component
 public class ScheduledTasks {
     @Autowired
@@ -47,7 +50,7 @@ public class ScheduledTasks {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     /**
-     * 定期检查是否有新任务，若有，则执行。
+     * 定期检查是否有未完成任务，若有，则执行任务。
      */
     @Scheduled(fixedDelay = 10000)
     public void executeTask(){
@@ -132,7 +135,7 @@ public class ScheduledTasks {
      */
     @Scheduled(fixedDelay = 10000)
     public void rpcMessage() {
-        sendOneMessage("34fr",23);
+        //sendOneMessage("34fr",23);
         // 注册管理器
         Registry registry = null;
         try {
@@ -151,7 +154,8 @@ public class ScheduledTasks {
             // 根据命名获取服务
             IService server = (IService) registry.lookup("vince");
             // 调用远程方法
-
+            System.out.println("proMessage is:"+proMessage);
+            System.out.println("mainStation is:"+mainStation);
 
             Message sendMessage = new Message();
 
@@ -185,9 +189,6 @@ public class ScheduledTasks {
                         film.setUserName(serverMessage.getFirstMessage()[i].getFirstUsername());
                         filmDao.save(film);
                     }
-
-
-
 
                 }
                 //获取需要的分站信息
@@ -270,9 +271,6 @@ public class ScheduledTasks {
 
             System.out.println("服务端返回的的内容：");
             System.out.println(result);
-
-
-
 
 
         } catch (AccessException e) {
