@@ -8,11 +8,15 @@ spring:
         hibernate:
             ddl-auto: update
             show-sql: true
-
+# 节目本地存放目录
 filmDir: D:\\films
-mainStation: 127.0.0.1 #主站的IP地址
+#主站的IP地址
+mainStation: 127.0.0.1
+# 分站的id
 onlyId: 2342
+# 日志记录级别
 logging:
   level:
       edu: debug
+# 内容服务器的端口
 remotePort: 8080
