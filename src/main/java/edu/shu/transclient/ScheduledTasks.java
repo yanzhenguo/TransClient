@@ -285,38 +285,4 @@ public class ScheduledTasks {
         }
     }
 
-    public void sendOneMessage(String filmId, Integer filmState){
-        //sendOneMessage("34fr",23);
-        // 注册管理器
-        Registry registry = null;
-        try {
-            // 获取服务注册管理器
-            registry = LocateRegistry.getRegistry(mainStation,8088);
-            // 列出所有注册的服务
-        } catch (RemoteException e) {
-            System.out.println(1);
-            System.out.println(e);
-        }
-        try {
-            // 根据命名获取服务
-            IService server = (IService) registry.lookup("vince");
-            System.out.println("onlyMessage客户端发送的内容：");
-            String stringMessage = JSON.toJSONString(onlyId+","+filmId+","+String.valueOf(filmState));
-
-            System.out.println(stringMessage);
-            server.queryMessage(stringMessage);
-
-            // 调用远程方法
-        } catch (AccessException e) {
-            System.out.println(2);
-            System.out.println(e);
-        } catch (RemoteException e) {
-            System.out.println(3);
-            System.out.println(e);
-        } catch (NotBoundException e) {
-            System.out.println(4);
-            System.out.println(e);
-        }
-    }
-
 }
