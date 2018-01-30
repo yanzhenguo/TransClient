@@ -10,10 +10,15 @@ spring:
             show-sql: true
 # 节目本地存放目录
 filmDir: D:\\films
-#主站的IP地址
-mainStation: 127.0.0.1
-# 分站的id
-onlyId: 2342
+# 主站RPC的url连接。
+mainStationUrl: http://222.186.43.94:8080/com7x250/xmlrpc.php
+# 分站请求主站的用户名和密码
+stationUid: zgy
+password: zgyzgy
+#分站轮询主站时间间隔，单位毫秒
+queryInterval: 20000
+#分站向主站报告下载进度的时间间隔,单位秒
+reportProgressInterval: 5
 # 日志记录级别
 logging:
   level:

@@ -1,12 +1,17 @@
 package edu.shu.transclient;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import edu.shu.dao.FilmDao;
 import edu.shu.entity.Film;
 import edu.shu.trans.HttpsTrans;
 import edu.shu.dao.FilmFileDao;
 import edu.shu.entity.FilmFile;
+import edu.shu.trans.MainStationTrans;
+import edu.shu.util.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +30,15 @@ public class ScheduledTasks {
     FilmFileDao filmFileDao;
     @Autowired
     FilmDao filmDao;
+    @Autowired
+    MainStationTrans mainStationTrans;
+    @Autowired
+    HttpsTrans httpsTrans;
+
     @Value("${filmDir}")
     private String filmDir;
-    @Value("${onlyId}")
-    private String onlyId;
-    @Value("${mainStation}")
-    private String mainStation;
 
     private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
-
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     /**
@@ -49,39 +54,8 @@ public class ScheduledTasks {
         List<Film> films = filmDao.findAll(ex);
         //若无新任务，直接返回
         if(films==null || films.size()==0) return;
-        film = films.get(0);
-        HttpsTrans httpsTrans = new HttpsTrans(film.getRemoteIp(),film.getUserName(),film.getPassWord());
-        String isLogin = httpsTrans.login();
-        if(!isLogin.equals("success")){
-            for(int i=0;i<10;i++){
-                isLogin = httpsTrans.login();
-                if(isLogin.equals("success")) break;
-            }
-        }
-        if(isLogin.equals("wrong")){
-            log.warn(" cannot connect to server after several tries.");
-            return;
-        }
-        if(isLogin.equals("expire")){
-            //登陆错误处理
-            film.setState(-1);
-            filmDao.save(film);
-            return;
-        }
-        //获取节目相关文件
-        httpsTrans.getFilmFile(film.getFilmId());
-        //下载节目相关文件
-        FilmFile f = new FilmFile();
-        f.setFilmId(film.getFilmId());
-        Example<FilmFile> exFilmFile = Example.of(f, matcher);
-        List<FilmFile> filmFiles = filmFileDao.findAll(exFilmFile);
-        if(filmFiles==null || filmFiles.size()==0) return;
-        for(FilmFile ff: filmFiles){
-            try {
-                httpsTrans.download(filmDir,ff.getFileName(),ff.getFilmId());
-            }catch (Exception e){
-            }
-
+        for(Film f : films){
+            httpsTrans.initAndDownload(f);
         }
 
     }
@@ -89,7 +63,7 @@ public class ScheduledTasks {
     /**
      * 更新任务的状态
      */
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 5000)
     public void updateTask(){
         //查找是否有未完成任务
         Film film = new Film();
@@ -115,6 +89,72 @@ public class ScheduledTasks {
                 filmDao.save(film1);
                 log.debug("film "+film1.getFilmId()+" has been downloaded");
             }
+        }
+    }
+
+    /**
+     * 向主站轮询任务并报告状态,时间间隔读取配置文件中的变量
+     */
+    @Scheduled(fixedDelayString="${queryInterval}")
+    public void queryMainStation(){
+        Map result=mainStationTrans.queryTasks();
+        if(result==null){
+            return;
+        }
+        //保存需要下载的节目
+        List<Film> films=(List<Film>)result.get("filmTask");
+        if(films!=null && films.size()>0){
+            ExampleMatcher matcher = ExampleMatcher.matching();
+            Film exampleFilm=new Film();
+            for(Film film : films){
+                exampleFilm.setFilmId(film.getFilmId());
+                Example<Film> example= Example.of(exampleFilm,matcher);
+                if(filmDao.findOne(example)==null){//数据库不存在该节目
+                    filmDao.save(film);
+                }
+            }
+        }
+        //向主站报告状态
+        String reportInfo=(String)result.get("reportInfo");
+        String newReportInfo="";
+        Properties props = System.getProperties();
+        //获取操作系统版本
+        String osInfo=null;
+        if(reportInfo.contains("osInfo")){
+            osInfo=props.getProperty("os.name")+"/"+props.getProperty("os.version");
+            newReportInfo+="osInfo ";
+        }
+        //获取磁盘使用信息
+        String diskInfo= null;
+        if(reportInfo.contains("diskInfo")){
+            diskInfo= SystemInfo.getDistInfo();
+            newReportInfo+="diskInfo ";
+        }
+        //获取CPU使用信息
+        String cpuInfo=null;
+        if(reportInfo.contains("cpuInfo")){
+            cpuInfo=String.valueOf((int)(SystemInfo.getCpuInfo()*100));
+            newReportInfo+="cpuInfo ";
+        }
+        //获取内存使用信息
+        String memoryInfo=null;
+        if(reportInfo.contains("memInfo")){
+            memoryInfo=SystemInfo.getMemoryInfo();
+            newReportInfo+="memInfo ";
+        }
+        //获取节目文件数
+        String fileCount=null;
+        if(reportInfo.contains("docTotal")){
+            newReportInfo+="docTotal";
+            try{
+                fileCount=String.valueOf(SystemInfo.getFile(new File(filmDir)));
+            }catch (Exception e){
+                fileCount="0";
+            }
+        }
+        if(osInfo!=null || diskInfo!=null || cpuInfo!=null || memoryInfo!=null || fileCount!=null){
+            log.info("向主站报告分站状态："+newReportInfo);
+            mainStationTrans.rptSubsiteServerStatus(osInfo,diskInfo,cpuInfo,memoryInfo,fileCount);
         }
     }
 

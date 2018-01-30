@@ -34,15 +34,26 @@ public class FileUtil {
             }
             in.close();
 
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            return "";
         }
-        BigInteger bigInt = new BigInteger(1, digest.digest());
+        return bytesToHexString(digest.digest());
+    }
 
-        return bigInt.toString(16);
+    /**
+     * 将字节数组转换为16进制字符串
+     * @param bArray
+     * @return
+     */
+    public static String bytesToHexString(byte[] bArray) {
+        StringBuffer sb = new StringBuffer(bArray.length);
+        String sTemp;
+        for (int i = 0; i < bArray.length; i++) {
+            sTemp = Integer.toHexString(0xFF & bArray[i]);
+            if (sTemp.length() < 2)
+                sb.append(0);
+            sb.append(sTemp);
+        }
+        return sb.toString();
     }
 }
