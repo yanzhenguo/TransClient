@@ -8,7 +8,6 @@ import edu.shu.entity.FilmFile;
 import edu.shu.entity.FileSpe;
 import edu.shu.transclient.ScheduledTasks;
 import edu.shu.util.FileUtil;
-import edu.shu.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,21 +214,22 @@ public class HttpsTrans{
             FileOutputStream fos = new FileOutputStream(file,true);
             while ((readLen = inputStream.read(buffer)) != -1) {
                 sumRead+=readLen;
-                updateProcess(sumRead, realFileSize, filmFile);
                 if(new Date().getTime()-date>reportProgressInterval*1000){
+                    updateProcess(sumRead, realFileSize, filmFile);
                     mainStationTrans.reportProgress(filmFile.getFilmId());
                     date=new Date().getTime();
                 }
                 fos.write(buffer, 0, readLen);
             }
             //下载完成后，再次报告进度
+            updateProcess(sumRead, realFileSize, filmFile);
             mainStationTrans.reportProgress(filmFile.getFilmId());
             //关闭IO流
             fos.close();
             inputStream.close();
             log.debug("文件"+filmFile.getFileName()+"下载完成，下载大小为："+file.length());
         }catch (Exception e){
-            log.warn("error occur when download file.");
+            log.warn("下载文件时出错！");
         }
     }
 
