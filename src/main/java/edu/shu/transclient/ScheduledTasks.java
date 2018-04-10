@@ -78,16 +78,21 @@ public class ScheduledTasks {
             f.setFilmId(film1.getFilmId());
             Example<FilmFile> exFilmFile = Example.of(f, matcher);
             List<FilmFile> filmFiles = filmFileDao.findAll(exFilmFile);
-            if(filmFiles==null || filmFiles.size()==0) isComplete=false;
-            for(FilmFile filmFile:filmFiles){
-                if(filmFile.getHasCheck()==0){
-                    isComplete=false;
+            if(filmFiles==null || filmFiles.size()==0) {
+                isComplete=false;
+            }else{
+                for(FilmFile filmFile:filmFiles){
+                    if(filmFile.getHasCheck()==0){
+                        isComplete=false;
+                    }
                 }
             }
+
             if(isComplete){
                 film1.setState(1);
                 filmDao.save(film1);
-                log.debug("film "+film1.getFilmId()+" has been downloaded");
+                mainStationTrans.reportProgress(film1.getFilmId());
+                log.debug("节目："+film1.getFilmId()+"已下载完成。");
             }
         }
     }
@@ -109,8 +114,25 @@ public class ScheduledTasks {
             for(Film film : films){
                 exampleFilm.setFilmId(film.getFilmId());
                 Example<Film> example= Example.of(exampleFilm,matcher);
-                if(filmDao.findOne(example)==null){//数据库不存在该节目
+                Film tempFilm = filmDao.findOne(example);
+                if(tempFilm==null){//数据库不存在该节目
                     filmDao.save(film);
+                }else if(tempFilm.getState()==0){
+                    //数据库已存在该节目，并且任务未完成
+                    tempFilm.setUserName(film.getUserName());
+                    tempFilm.setPassWord(film.getPassWord());
+                    filmDao.save(tempFilm);
+                }else{ //若已存在该节目，并且已下载完成
+                    tempFilm.setUserName(film.getUserName());
+                    tempFilm.setPassWord(film.getPassWord());
+                    tempFilm.setState(0);
+                    filmDao.save(tempFilm);
+                    //删除每个节目文件的记录
+                    FilmFile filmFile=new FilmFile();
+                    filmFile.setFilmId(tempFilm.getFilmId());
+                    Example<FilmFile> filmFileExample=Example.of(filmFile,matcher);
+                    List<FilmFile> filmFiles = filmFileDao.findAll(filmFileExample);
+                    filmFileDao.deleteInBatch(filmFiles);
                 }
             }
         }

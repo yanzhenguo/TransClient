@@ -61,8 +61,8 @@ public class HttpsTrans{
         }
         if(isLogin.equals("expire")){
             //账号已过期，设置任务状态为失败状态
-            film.setState(-1);
-            filmDao.save(film);
+//            film.setState(-1);
+//            filmDao.save(film);
             return;
         }
         //获取节目相关文件
@@ -73,12 +73,26 @@ public class HttpsTrans{
         f.setFilmId(film.getFilmId());
         Example<FilmFile> exFilmFile = Example.of(f, matcher);
         List<FilmFile> filmFiles = filmFileDao.findAll(exFilmFile);
+        //删除文件夹中无关文件
+        File rootDir=new File(filmDir+File.separator+film.getFilmId());
+        File[] existFiles = rootDir.listFiles();
+        if(existFiles!=null && existFiles.length>1){
+            for (File existFile: existFiles){
+                boolean shouldDelete = true;
+                for(FilmFile filmFile: filmFiles){
+                    if(existFile.getName().equals(filmFile.getFileName())){
+                        shouldDelete=false;
+                    }
+                }
+                if(shouldDelete){
+                    existFile.delete();
+                }
+            }
+        }
+
         if(filmFiles==null || filmFiles.size()==0) return;
         for(FilmFile ff: filmFiles){
-            try {
-                download(ff);
-            }catch (Exception e){
-            }
+            download(ff);
         }
     }
 
@@ -230,6 +244,7 @@ public class HttpsTrans{
             log.debug("文件"+filmFile.getFileName()+"下载完成，下载大小为："+file.length());
         }catch (Exception e){
             log.warn("下载文件时出错！");
+            file.delete();
         }
     }
 
@@ -284,26 +299,27 @@ public class HttpsTrans{
         }
         log.debug("已下载文件大小: "+file.length());
         if(f.getHasCheck()==1){
-            log.debug("文件"+f.getFileName()+"校验状态显示完成，跳过该文件。");
+            log.debug("文件："+f.getFileName()+"已完成校验，跳过该文件。");
             return true;
         }
         if(f.getSize()!=file.length()){
             if(f.getSize()<file.length()){
-                log.debug("文件"+f.getFileName()+"超出其实际大小，将删除重新下载。");
+                log.debug("文件："+f.getFileName()+"超出其实际大小，将删除重新下载。");
                 file.delete();
             }
-            log.debug("文件"+f.getFileName()+"未下载完成，将继续下载。");
+            log.debug("文件："+f.getFileName()+"未下载完成，将继续下载。");
             return false;
         }
         String md5String = FileUtil.getFileMD5(file);
         if(!md5String.equals(f.getMd5())){
-            log.debug("文件 "+f.getFileName()+" md5校验没通过。");
+            log.debug("文件："+f.getFileName()+" md5校验没通过，将删除重新下载。");
             file.delete();
             return false;
         }
         else{
-            log.debug("文件"+f.getFileName()+"校验成功");
+            log.debug("文件："+f.getFileName()+"校验成功");
             f.setHasCheck(1);
+            f.setProgress(100);
             filmFileDao.save(f);
         }
         return true;
